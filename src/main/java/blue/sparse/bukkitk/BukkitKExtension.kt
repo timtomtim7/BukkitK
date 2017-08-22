@@ -12,11 +12,11 @@ inline fun JavaPlugin.command(name: String, description: String = "", usage: Str
 {
 	val command: Command = object : Command(name, description, usage, aliases.toList())
 	{
-		override fun execute(sender: CommandSender?, label: String?, args: Array<out String>?): Boolean
+		override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean
 		{
 			try
 			{
-				body(CommandContext(sender!!, this, label!!, args!!))
+				body(CommandContext(sender, this, label, args))
 			} catch (e: CommandContext.CommandInterrupt)
 			{
 			}
