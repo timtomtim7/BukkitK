@@ -1,5 +1,7 @@
 package blue.sparse.bukkitk
 
+import blue.sparse.bukkitk.commands.Parser
+import blue.sparse.bukkitk.events.listen
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.SimpleCommandMap
@@ -45,14 +47,14 @@ class BukkitKPlugin : JavaPlugin()
 	{
 		listen<PluginDisableEvent> {
 			println("plugin disable")
-			val commands = pluginCommandMap[plugin] ?: return@listen
-			pluginCommandMap.remove(plugin)
+			val commands = pluginCommandMap[it.plugin] ?: return@listen
+			pluginCommandMap.remove(it.plugin)
 			commands.forEach { it.unregister(commandMap) }
 			actualCommandMap.values.removeAll(commands)
 
-			println("Unregistered ${commands.size} commands for ${plugin.name}")
+			println("Unregistered ${commands.size} commands for ${it.plugin.name}")
 
-			Parser.unregisterAll(plugin)
+			Parser.unregisterAll(it.plugin)
 		}
 	}
 }

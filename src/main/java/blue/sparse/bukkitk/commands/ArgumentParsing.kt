@@ -1,7 +1,11 @@
-package blue.sparse.bukkitk
+package blue.sparse.bukkitk.commands
 
+import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
+import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.*
 
 interface Parser<in T, out R>
 {
@@ -10,6 +14,22 @@ interface Parser<in T, out R>
 	{
 		private val registeredParsers: MutableMap<Class<*>, Parser<String, *>> = HashMap()
 		private val pluginParsers: MutableMap<Plugin, MutableList<Parser<String, *>>> = HashMap()
+
+		init
+		{
+			registeredParsers.put(Int::class.java, of(Integer::parseInt))
+			registeredParsers.put(java.lang.Integer::class.java, of(Integer::parseInt))
+			registeredParsers.put(Long::class.java, of(java.lang.Long::parseLong))
+			registeredParsers.put(java.lang.Long::class.java, of(java.lang.Long::parseLong))
+			registeredParsers.put(Float::class.java, of(java.lang.Float::parseFloat))
+			registeredParsers.put(java.lang.Float::class.java, of(java.lang.Float::parseFloat))
+			registeredParsers.put(Double::class.java, of(java.lang.Double::parseDouble))
+			registeredParsers.put(java.lang.Double::class.java, of(java.lang.Double::parseDouble))
+
+			registeredParsers.put(Player::class.java, of<String, Player>(Bukkit::getPlayer))
+			registeredParsers.put(OfflinePlayer::class.java, of<String, OfflinePlayer>(Bukkit::getOfflinePlayer))
+			registeredParsers.put(UUID::class.java, of(UUID::fromString))
+		}
 
 		fun unregisterAll(plugin: Plugin)
 		{
@@ -47,10 +67,9 @@ interface Parser<in T, out R>
 
 		fun <T> get(clazz: Class<T>): Parser<String, T>?
 		{
+			println("Getting parser for class ${clazz.name}")
 			return registeredParsers[clazz] as Parser<String, T>?
 		}
-
-//		fun <T> register(clazz: Class<T>, parser: Parser<String, T>)
 
 		inline fun <T, R> of(crossinline body: (T) -> R?): Parser<T, R>
 		{
@@ -83,11 +102,6 @@ interface Parser<in T, out R>
 			return@of if (body(value)) value else null
 		}
 	}
-
-//	infix fun otherwise(body: () -> String)
-//	{
-//
-//	}
 }
 
 inline fun <reified T> parser(): Parser<String, T>?
@@ -101,24 +115,16 @@ inline fun <reified T> parser(body: Parser<String, T>.() -> Parser<String, T>): 
 	return body(parser)
 }
 
-val Int.Companion.parser: Parser<String, Int>
-	get() = Parser.of {
-		try
-		{
-			Integer.parseInt(it)
-		} catch (e: NumberFormatException)
-		{
-			null
-		}
-	}
+fun parseQuotes(args: Array<out String>) = parseQuotes(args.joinToString(" "))
 
-val Double.Companion.parser: Parser<String, Double>
-	get() = Parser.of {
-		try
-		{
-			java.lang.Double.parseDouble(it)
-		} catch (e: NumberFormatException)
-		{
-			null
-		}
-	}
+fun parseQuotes(message: String): Array<out String>
+{
+	val quoteRegex = Regex("\"([^\"]+)\"|([^\" ]+)")
+
+	return quoteRegex.findAll(message).map {
+		val spaced = it.groupValues.last()
+		if (spaced.isEmpty())
+			return@map it.groupValues[it.groupValues.size - 2]
+		return@map spaced
+	}.toList().toTypedArray()
+}

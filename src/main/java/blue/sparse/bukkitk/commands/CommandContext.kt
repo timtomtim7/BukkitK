@@ -1,8 +1,9 @@
-package blue.sparse.bukkitk
+package blue.sparse.bukkitk.commands
 
-import org.bukkit.ChatColor
+import blue.sparse.bukkitk.BukkitKPlugin
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
+import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 
 data class CommandContext(val sender: CommandSender, val command: Command, val label: String, val args: Array<out String>)
@@ -28,9 +29,6 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		result = 31 * result + Arrays.hashCode(args)
 		return result
 	}
-
-	val String.colored: String
-		get() = ChatColor.translateAlternateColorCodes('&', this)
 
 	fun reply(message: String)
 	{
@@ -64,30 +62,66 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		throw SubCommandInterrupt()
 	}
 
-	fun <T> expect(string: String?, parser: Parser<String, T>, fallback: () -> Unit = { sender.sendMessage("Invalid syntax") }): T
+	fun <T> expect(string: String?, parser: Parser<String, T>?, fallback: () -> Unit = { sender.sendMessage("Invalid syntax") }): T
 	{
-		val result = if (string == null) null else parser(string)
-		if (result != null) return result
+		return string?.let {
+			try
+			{
+				parser?.invoke(it)
+			} catch (e: Throwable)
+			{
+				null
+			}
+		} ?: run {
+			fallback()
+			throw CommandInterrupt()
+		}
 
-		fallback()
-		throw CommandInterrupt()
+//		if(parser != null)
+//		{
+//			val result = if (string == null) null else parser(string)
+//			if (result != null) return result
+//		}
+//
+//		fallback()
+//		throw CommandInterrupt()
 	}
 
-	fun <T> expect(index: Int, parser: Parser<String, T>, fallback: () -> Unit = { sender.sendMessage("Invalid syntax") }): T
+	fun <T> expect(index: Int, parser: Parser<String, T>?, fallback: () -> Unit = { sender.sendMessage("Invalid syntax") }): T
 	{
 		return expect(args.getOrNull(index), parser, fallback)
 	}
 
 	inline fun <reified T> expect(index: Int): T
 	{
-		return expect(index, Parser.get(T::class.java)!!)
+		return expect(index, Parser.get(T::class.java))
 	}
 
 	inline fun <reified T> expect(index: Int, noinline fallback: () -> Unit): T
 	{
-		return expect(index, Parser.get(T::class.java)!!, fallback)
+		return expect(index, Parser.get(T::class.java), fallback)
 	}
 
 	open class CommandInterrupt : Throwable()
 	class SubCommandInterrupt : CommandInterrupt()
+}
+
+inline fun JavaPlugin.command(name: String, description: String = "", usage: String = "$name [args]", vararg aliases: String, useQuotes: Boolean = false, crossinline body: CommandContext.() -> Unit)
+{
+	val command: Command = object : Command(name, description, usage, aliases.toList())
+	{
+		override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean
+		{
+			val realArgs = if (useQuotes) parseQuotes(args) else args
+			try
+			{
+				body(CommandContext(sender, this, label, realArgs))
+			} catch (e: CommandContext.CommandInterrupt)
+			{
+			}
+
+			return true
+		}
+	}
+	BukkitKPlugin.register(this, command)
 }
