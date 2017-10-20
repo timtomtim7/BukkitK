@@ -19,12 +19,12 @@
     </licenses>
 
     <properties>
-        <kotlin.version>1.2-M2</kotlin.version>
+        <kotlin.version>1.2.0-beta-88</kotlin.version>
     </properties>
 
     <repositories>
         <repository>
-            <id>KotlinDev</id>
+            <id>kotlin-dev</id>
             <url>https://dl.bintray.com/kotlin/kotlin-dev/</url>
         </repository>
         <repository>
@@ -77,6 +77,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>
