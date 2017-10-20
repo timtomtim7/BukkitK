@@ -1,6 +1,6 @@
 package blue.sparse.bukkitk.commands
 
-import blue.sparse.bukkitk.BukkitKPlugin
+import blue.sparse.bukkitk.extensions.colored
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
@@ -35,10 +35,19 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		sender.sendMessage(message)
 	}
 
-	fun error(message: String): Nothing
+	fun fail(message: String): Nothing = fail { reply("\u00a7c$message") }
+
+	inline fun fail(body: () -> Unit): Nothing
 	{
-		sender.sendMessage("\u00a7c$message")
+		body()
 		throw CommandInterrupt()
+	}
+
+	fun failIf(value: Boolean, message: String) = failIf(value, { reply("\u00a7c$message") })
+
+	inline fun failIf(value: Boolean, body: () -> Unit)
+	{
+		if (value) fail(body)
 	}
 
 	inline fun subcommand(name: String, body: CommandContext.() -> Unit)
@@ -69,7 +78,7 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		throw SubCommandInterrupt()
 	}
 
-	fun <T> expect(string: String?, parser: Parser<String, T>?, fallback: () -> Unit = { sender.sendMessage("Invalid syntax") }): T
+	fun <T> optional(string: String?, parser: Parser<String, T>?): T?
 	{
 		return string?.let {
 			try
@@ -79,13 +88,38 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 			{
 				null
 			}
-		} ?: run {
+		}
+	}
+
+	fun <T> optional(index: Int, parser: Parser<String, T>?): T?
+	{
+		return optional(args.getOrNull(index), parser)
+	}
+
+	inline fun <reified T> optional(index: Int): T?
+	{
+		return optional(index, Parser.get(T::class.java))
+	}
+
+	fun <T> expect(string: String?, parser: Parser<String, T>?): T
+	{
+		return expect(string, parser) { reply("\u00a7c${command.usage}") }
+	}
+
+	inline fun <T> expect(string: String?, parser: Parser<String, T>?, fallback: () -> Unit): T
+	{
+		return optional(string, parser) ?: run {
 			fallback()
 			throw CommandInterrupt()
 		}
 	}
 
-	fun <T> expect(index: Int, parser: Parser<String, T>?, fallback: () -> Unit = { sender.sendMessage("Invalid syntax") }): T
+	fun <T> expect(index: Int, parser: Parser<String, T>?): T
+	{
+		return expect(index, parser) { reply("\u00a7c${command.usage}") }
+	}
+
+	inline fun <T> expect(index: Int, parser: Parser<String, T>?, fallback: () -> Unit): T
 	{
 		return expect(args.getOrNull(index), parser, fallback)
 	}
@@ -95,7 +129,7 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		return expect(index, Parser.get(T::class.java))
 	}
 
-	inline fun <reified T> expect(index: Int, noinline fallback: () -> Unit): T
+	inline fun <reified T> expect(index: Int, crossinline fallback: () -> Unit): T
 	{
 		return expect(index, Parser.get(T::class.java), fallback)
 	}
@@ -108,12 +142,20 @@ inline fun JavaPlugin.command(
 		name: String,
 		description: String = "",
 		usage: String = "$name [args]",
+		permission: String? = null,
+		permissionMessage: String = "&cYou don't have permission for this.".colored,
 		vararg aliases: String,
 		argumentMode: ArgumentMode = ArgumentMode.NORMAL,
 		crossinline body: CommandContext.() -> Unit)
 {
 	val command: Command = object : Command(name, description, usage, aliases.toList())
 	{
+		init
+		{
+			this.permission = permission
+			this.permissionMessage = permissionMessage
+		}
+
 		override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean
 		{
 			try
@@ -126,5 +168,5 @@ inline fun JavaPlugin.command(
 			return true
 		}
 	}
-	BukkitKPlugin.register(this, command)
+	CommandHandler.register(this, command)
 }

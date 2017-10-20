@@ -71,7 +71,7 @@ interface Parser<in T, out R>
 
 		fun <T> get(clazz: Class<T>): Parser<String, T>?
 		{
-			println("Getting parser for class ${clazz.name}")
+//			println("Getting parser for class ${clazz.name}")
 			return registeredParsers[clazz] as Parser<String, T>?
 		}
 

@@ -1,4 +1,4 @@
-package blue.sparse.bukkitk
+package blue.sparse.bukkitk.extensions
 
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -16,3 +16,6 @@ fun JavaPlugin.repeat(delay: Long, body: () -> Unit)
 
 val String.colored: String
 	get() = ChatColor.translateAlternateColorCodes('&', this)
+
+//Static extensions, please.
+//val <T: JavaPlugin> T.instance: T get() = JavaPlugin.getPlugin(this::class.java)

@@ -22,6 +22,17 @@
         <kotlin.version>1.1.4-3</kotlin.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>okkero</id>
+            <url>http://nexus.okkero.com/repository/maven-releases/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -35,20 +46,13 @@
             <version>1.12-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.spigotmc</groupId>-->
-        <!--<artifactId>spigot</artifactId>-->
-        <!--<version>1.12-R0.1-SNAPSHOT</version>-->
-        <!--<scope>provided</scope>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.okkero.skedule</groupId>
+            <artifactId>skedule</artifactId>
+            <version>1.2.3</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
