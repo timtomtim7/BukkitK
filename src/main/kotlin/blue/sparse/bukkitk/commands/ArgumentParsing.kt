@@ -2,6 +2,7 @@ package blue.sparse.bukkitk.commands
 
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
+import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
@@ -26,9 +27,12 @@ interface Parser<in T, out R>
 			registeredParsers.put(Double::class.java, of(java.lang.Double::parseDouble))
 			registeredParsers.put(java.lang.Double::class.java, of(java.lang.Double::parseDouble))
 
+			registeredParsers.put(String::class.java, of<String, String> { it })
+
 			registeredParsers.put(Player::class.java, of<String, Player>(Bukkit::getPlayer))
 			registeredParsers.put(OfflinePlayer::class.java, of<String, OfflinePlayer>(Bukkit::getOfflinePlayer))
 			registeredParsers.put(UUID::class.java, of(UUID::fromString))
+			registeredParsers.put(World::class.java, of<String, World>(Bukkit::getWorld))
 		}
 
 		fun unregisterAll(plugin: Plugin)

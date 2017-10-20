@@ -35,6 +35,12 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		sender.sendMessage(message)
 	}
 
+	fun error(message: String): Nothing
+	{
+		sender.sendMessage("\u00a7$message")
+		throw CommandInterrupt()
+	}
+
 	inline fun subcommand(name: String, body: CommandContext.() -> Unit)
 	{
 		if (args.isEmpty()) return
