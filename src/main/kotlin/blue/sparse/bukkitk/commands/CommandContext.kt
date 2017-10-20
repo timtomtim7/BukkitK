@@ -37,7 +37,7 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 
 	fun error(message: String): Nothing
 	{
-		sender.sendMessage("\u00a7$message")
+		sender.sendMessage("\u00a7c$message")
 		throw CommandInterrupt()
 	}
 
