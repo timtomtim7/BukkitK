@@ -16,6 +16,6 @@ fun JavaPlugin.repeat(delay: Long, body: () -> Unit)
 
 val String.colored: String
 	get() = ChatColor.translateAlternateColorCodes('&', this)
-
+val String.coloured: String get() = colored
 //Static extensions, please.
 //val <T: JavaPlugin> T.instance: T get() = JavaPlugin.getPlugin(this::class.java)

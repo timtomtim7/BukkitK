@@ -9,8 +9,8 @@ import org.bukkit.inventory.meta.ItemMeta
 val ItemStack?.empty get() = this == null || type == Material.AIR || amount <= 0
 fun ItemStack?.notEmptyOrNull() = if (empty) null else this
 
-inline fun item(material: Material, crossinline body: ItemStack.() -> Unit): ItemStack
-		= ItemStack(material).apply(body)
+inline fun item(material: Material, amount: Int = 1, crossinline body: ItemStack.() -> Unit = {}): ItemStack
+		= ItemStack(material, amount).apply(body)
 
 inline fun item(item: ItemStack, crossinline body: ItemStack.() -> Unit): ItemStack
 		= item.apply(body)

@@ -16,14 +16,14 @@ operator fun Inventory.get(slot: Int): ItemStack? = getItem(slot)
 inline fun Inventory.setItem(slot: Int, item: ItemStack, crossinline body: ItemStack.() -> Unit)
 		= setItem(slot, item(item, body))
 
-inline fun Inventory.setItem(slot: Int, material: Material, crossinline body: ItemStack.() -> Unit)
-		= setItem(slot, item(material, body))
+inline fun Inventory.setItem(slot: Int, material: Material, amount: Int = 1, crossinline body: ItemStack.() -> Unit = {})
+		= setItem(slot, item(material, amount, body))
 
 inline fun Inventory.addItem(item: ItemStack, crossinline body: ItemStack.() -> Unit)
 		= addItem(item(item, body))
 
-inline fun Inventory.addItem(material: Material, crossinline body: ItemStack.() -> Unit)
-		= addItem(item(material, body))
+inline fun Inventory.addItem(material: Material, amount: Int = 1, crossinline body: ItemStack.() -> Unit = {})
+		= addItem(item(material, amount, body))
 
 fun JavaPlugin.inventory(title: String, rows: Int): KInventoryHolder
 {
