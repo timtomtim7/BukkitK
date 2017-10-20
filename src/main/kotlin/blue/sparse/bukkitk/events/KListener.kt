@@ -16,6 +16,8 @@ class KListener<T : Event>(private val listener: Listener, val event: Class<T>)
 		HandlerList.unregisterAll(listener)
 		registered = false
 	}
+
+	fun isRegistered() = registered
 }
 
 inline fun <reified T : Event> JavaPlugin.listen(

@@ -128,3 +128,10 @@ fun parseQuotes(message: String): Array<out String>
 		return@map spaced
 	}.toList().toTypedArray()
 }
+
+enum class ArgumentMode(val converter: (Array<out String>) -> Array<out String>)
+{
+	NORMAL({ it }),
+	QUOTES(::parseQuotes),
+	COMMA_SEPARATED({ it.joinToString(" ").split(Regex(", ?")).toTypedArray() });
+}

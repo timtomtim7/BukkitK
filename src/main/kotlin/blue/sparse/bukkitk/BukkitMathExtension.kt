@@ -20,49 +20,9 @@ operator fun Vector.plusAssign(other: Vector)
 	this.add(other)
 }
 
-operator fun Vector.minusAssign(other: Vector)
-{
-	this.subtract(other)
-}
-
-operator fun Vector.timesAssign(other: Vector)
-{
-	this.multiply(other)
-}
-
-operator fun Vector.divAssign(other: Vector)
-{
-	this.divide(other)
-}
-
-operator fun Vector.remAssign(other: Vector)
-{
-	this.assign(x % other.x, y % other.y, z % other.z)
-}
-
 operator fun Vector.plusAssign(other: Block)
 {
 	this.add(other.vector)
-}
-
-operator fun Vector.minusAssign(other: Block)
-{
-	this.subtract(other.vector)
-}
-
-operator fun Vector.timesAssign(other: Block)
-{
-	this.multiply(other.vector)
-}
-
-operator fun Vector.divAssign(other: Block)
-{
-	this.divide(other.vector)
-}
-
-operator fun Vector.remAssign(other: Block)
-{
-	this.assign(x % other.x, y % other.y, z % other.z)
 }
 
 operator fun Vector.plusAssign(other: Location)
@@ -70,29 +30,24 @@ operator fun Vector.plusAssign(other: Location)
 	this.add(other.vector)
 }
 
-operator fun Vector.minusAssign(other: Location)
+operator fun Vector.plusAssign(other: Number)
+{
+	assign(x + other.toDouble(), y + other.toDouble(), z + other.toDouble())
+}
+
+operator fun Vector.minusAssign(other: Vector)
+{
+	this.subtract(other)
+}
+
+operator fun Vector.minusAssign(other: Block)
 {
 	this.subtract(other.vector)
 }
 
-operator fun Vector.timesAssign(other: Location)
+operator fun Vector.minusAssign(other: Location)
 {
-	this.multiply(other.vector)
-}
-
-operator fun Vector.divAssign(other: Location)
-{
-	this.divide(other.vector)
-}
-
-operator fun Vector.remAssign(other: Location)
-{
-	this.assign(x % other.x, y % other.y, z % other.z)
-}
-
-operator fun Vector.plusAssign(other: Number)
-{
-	assign(x + other.toDouble(), y + other.toDouble(), z + other.toDouble())
+	this.subtract(other.vector)
 }
 
 operator fun Vector.minusAssign(other: Number)
@@ -100,9 +55,39 @@ operator fun Vector.minusAssign(other: Number)
 	assign(x - other.toDouble(), y - other.toDouble(), z - other.toDouble())
 }
 
+operator fun Vector.timesAssign(other: Vector)
+{
+	this.multiply(other)
+}
+
+operator fun Vector.timesAssign(other: Block)
+{
+	this.multiply(other.vector)
+}
+
+operator fun Vector.timesAssign(other: Location)
+{
+	this.multiply(other.vector)
+}
+
 operator fun Vector.timesAssign(other: Number)
 {
 	assign(x * other.toDouble(), y * other.toDouble(), z * other.toDouble())
+}
+
+operator fun Vector.divAssign(other: Vector)
+{
+	this.divide(other)
+}
+
+operator fun Vector.divAssign(other: Block)
+{
+	this.divide(other.vector)
+}
+
+operator fun Vector.divAssign(other: Location)
+{
+	this.divide(other.vector)
 }
 
 operator fun Vector.divAssign(other: Number)
@@ -110,11 +95,25 @@ operator fun Vector.divAssign(other: Number)
 	assign(x / other.toDouble(), y / other.toDouble(), z / other.toDouble())
 }
 
+operator fun Vector.remAssign(other: Vector)
+{
+	this.assign(x % other.x, y % other.y, z % other.z)
+}
+
+operator fun Vector.remAssign(other: Block)
+{
+	this.assign(x % other.x, y % other.y, z % other.z)
+}
+
+operator fun Vector.remAssign(other: Location)
+{
+	this.assign(x % other.x, y % other.y, z % other.z)
+}
+
 operator fun Vector.remAssign(other: Number)
 {
 	assign(x % other.toDouble(), y % other.toDouble(), z % other.toDouble())
 }
-
 
 operator fun Vector.plus(other: Vector): Vector = this.clone().add(other)
 operator fun Vector.minus(other: Vector): Vector = this.clone().subtract(other)
@@ -139,7 +138,6 @@ operator fun Vector.minus(other: Number): Vector = this.clone().assign(x - other
 operator fun Vector.times(other: Number): Vector = this.clone().assign(x * other.toDouble(), y * other.toDouble(), z * other.toDouble())
 operator fun Vector.div(other: Number): Vector = this.clone().assign(x / other.toDouble(), y / other.toDouble(), z / other.toDouble())
 operator fun Vector.rem(other: Number): Vector = this.clone().assign(x % other.toDouble(), y % other.toDouble(), z % other.toDouble())
-
 
 fun <T> Block.checkSameWorld(other: Block, body: () -> T): T
 {

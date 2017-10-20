@@ -46,7 +46,6 @@ class BukkitKPlugin : JavaPlugin()
 	override fun onEnable()
 	{
 		listen<PluginDisableEvent> {
-			println("plugin disable")
 			val commands = pluginCommandMap[it.plugin] ?: return@listen
 			pluginCommandMap.remove(it.plugin)
 			commands.forEach { it.unregister(commandMap) }
@@ -56,5 +55,28 @@ class BukkitKPlugin : JavaPlugin()
 
 			Parser.unregisterAll(it.plugin)
 		}
+
+//		command("test") {
+//			if (sender !is Player) return@command
+//
+//			reply("Waiting for block click")
+//			val listener = listen<PlayerInteractEvent> {
+//				if (it.player != sender || it.action != Action.LEFT_CLICK_BLOCK)
+//					return@listen
+//
+//				val b = it.clickedBlock
+//				reply("Block clicked: ${b.x} ${b.y} ${b.z}")
+//
+//				it.cancel()
+//				unregister()
+//			}
+//			delay(20 * 10) {
+//				if (!listener.isRegistered())
+//					return@delay
+//
+//				reply("Block click timed out")
+//				listener.unregister()
+//			}
+//		}
 	}
 }

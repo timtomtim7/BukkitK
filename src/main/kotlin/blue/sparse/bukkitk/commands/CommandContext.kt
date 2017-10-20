@@ -59,6 +59,7 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		} catch (e: CommandInterrupt)
 		{
 		}
+
 		throw SubCommandInterrupt()
 	}
 
@@ -76,15 +77,6 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 			fallback()
 			throw CommandInterrupt()
 		}
-
-//		if(parser != null)
-//		{
-//			val result = if (string == null) null else parser(string)
-//			if (result != null) return result
-//		}
-//
-//		fallback()
-//		throw CommandInterrupt()
 	}
 
 	fun <T> expect(index: Int, parser: Parser<String, T>?, fallback: () -> Unit = { sender.sendMessage("Invalid syntax") }): T
@@ -106,16 +98,21 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 	class SubCommandInterrupt : CommandInterrupt()
 }
 
-inline fun JavaPlugin.command(name: String, description: String = "", usage: String = "$name [args]", vararg aliases: String, useQuotes: Boolean = false, crossinline body: CommandContext.() -> Unit)
+inline fun JavaPlugin.command(
+		name: String,
+		description: String = "",
+		usage: String = "$name [args]",
+		vararg aliases: String,
+		argumentMode: ArgumentMode = ArgumentMode.NORMAL,
+		crossinline body: CommandContext.() -> Unit)
 {
 	val command: Command = object : Command(name, description, usage, aliases.toList())
 	{
 		override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean
 		{
-			val realArgs = if (useQuotes) parseQuotes(args) else args
 			try
 			{
-				body(CommandContext(sender, this, label, realArgs))
+				body(CommandContext(sender, this, label, argumentMode.converter(args)))
 			} catch (e: CommandContext.CommandInterrupt)
 			{
 			}
