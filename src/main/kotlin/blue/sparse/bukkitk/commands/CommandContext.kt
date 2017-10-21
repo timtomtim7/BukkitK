@@ -1,49 +1,32 @@
 package blue.sparse.bukkitk.commands
 
 import blue.sparse.bukkitk.extensions.colored
+import org.bukkit.ChatColor
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.plugin.java.JavaPlugin
-import java.util.*
 
-data class CommandContext(val sender: CommandSender, val command: Command, val label: String, val args: Array<out String>)
+class CommandContext(val sender: CommandSender, val command: Command, val label: String, val args: Array<out String>)
 {
-	override fun equals(other: Any?): Boolean
-	{
-		if (this === other) return true
-		if (other !is CommandContext) return false
-
-		if (sender != other.sender) return false
-		if (command != other.command) return false
-		if (label != other.label) return false
-		if (!Arrays.equals(args, other.args)) return false
-
-		return true
-	}
-
-	override fun hashCode(): Int
-	{
-		var result = sender.hashCode()
-		result = 31 * result + command.hashCode()
-		result = 31 * result + label.hashCode()
-		result = 31 * result + Arrays.hashCode(args)
-		return result
-	}
-
 	fun reply(message: String)
 	{
 		sender.sendMessage(message)
 	}
 
-	fun fail(message: String): Nothing = fail { reply("\u00a7c$message") }
+	fun reply(vararg messages: String)
+	{
+		sender.sendMessage(messages)
+	}
+
+	fun fail(message: String): Nothing = fail { reply("${ChatColor.RED}$message") }
 
 	inline fun fail(body: () -> Unit): Nothing
 	{
 		body()
-		throw CommandInterrupt()
+		throw FailCommandInterrupt()
 	}
 
-	fun failIf(value: Boolean, message: String) = failIf(value, { reply("\u00a7c$message") })
+	fun failIf(value: Boolean, message: String) = failIf(value, { reply("${ChatColor.RED}$message") })
 
 	inline fun failIf(value: Boolean, body: () -> Unit)
 	{
@@ -71,9 +54,7 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		try
 		{
 			body(CommandContext(sender, command, label, newArgs))
-		} catch (e: CommandInterrupt)
-		{
-		}
+		} catch (e: CommandInterrupt) { }
 
 		throw SubCommandInterrupt()
 	}
@@ -84,10 +65,7 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 			try
 			{
 				parser?.invoke(it)
-			} catch (e: Throwable)
-			{
-				null
-			}
+			} catch (e: Throwable) { null }
 		}
 	}
 
@@ -134,13 +112,14 @@ data class CommandContext(val sender: CommandSender, val command: Command, val l
 		return expect(index, Parser.get(T::class.java), fallback)
 	}
 
-	open class CommandInterrupt : Throwable()
-	class SubCommandInterrupt : CommandInterrupt()
+	open class CommandInterrupt: Throwable()
+	class SubCommandInterrupt: CommandInterrupt()
+	class FailCommandInterrupt: CommandInterrupt()
 }
 
 inline fun JavaPlugin.command(
 		name: String,
-		description: String = "",
+		description: String = "A ${this.name} command",
 		usage: String = "$name [args]",
 		permission: String? = null,
 		permissionMessage: String = "&cYou don't have permission for this.".colored,
@@ -158,12 +137,11 @@ inline fun JavaPlugin.command(
 
 		override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean
 		{
-			try
-			{
-				body(CommandContext(sender, this, label, argumentMode.converter(args)))
-			} catch (e: CommandContext.CommandInterrupt)
-			{
-			}
+			val ctx = CommandContext(sender, this, label, argumentMode.converter(args))
+			ctx.failIf(!sender.hasPermission(this.permission), this.permissionMessage)
+
+			try { body(ctx) }
+			catch (e: CommandContext.CommandInterrupt) { }
 
 			return true
 		}

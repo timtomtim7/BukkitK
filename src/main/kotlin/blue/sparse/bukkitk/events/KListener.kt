@@ -2,9 +2,10 @@ package blue.sparse.bukkitk.events
 
 import org.bukkit.Bukkit
 import org.bukkit.event.*
+import org.bukkit.plugin.EventExecutor
 import org.bukkit.plugin.java.JavaPlugin
 
-class KListener<T : Event>(private val listener: Listener, val event: Class<T>)
+abstract class KListener<T : Event>(val event: Class<T>): Listener, EventExecutor
 {
 	private var registered: Boolean = true
 
@@ -13,33 +14,31 @@ class KListener<T : Event>(private val listener: Listener, val event: Class<T>)
 		if (!registered)
 			throw IllegalStateException("KListener already unregistered")
 
-		HandlerList.unregisterAll(listener)
+		HandlerList.unregisterAll(this)
 		registered = false
 	}
 
 	fun isRegistered() = registered
+
+	@Suppress("UNCHECKED_CAST")
+	override fun execute(listener: Listener, event: Event)
+	{
+		if(listener != this || !event.javaClass.isInstance(event)) return
+
+		listen(event as T)
+	}
+
+	abstract fun listen(event: T)
 }
 
-inline fun <reified T : Event> JavaPlugin.listen(
-		priority: EventPriority = EventPriority.NORMAL,
-		ignoreCancelled: Boolean = true,
-		crossinline body: KListener<T>.(T) -> Unit): KListener<T>
+inline fun <reified T: Event> JavaPlugin.listen(
+		priority: EventPriority = EventPriority.NORMAL, ignoreCancelled: Boolean = true, crossinline body: KListener<T>.(T) -> Unit
+): KListener<T>
 {
-	val listener: Listener = object : Listener
-	{}
+	val listener = object: KListener<T>(T::class.java) { override fun listen(event: T) = body(this, event) }
 
-	val result = KListener(listener, T::class.java)
-
-	Bukkit.getPluginManager().registerEvent(
-			T::class.java,
-			listener,
-			priority,
-			{ lstnr, event -> if (lstnr == listener && event is T) body.invoke(result, event) },
-			this,
-			ignoreCancelled
-	)
-
-	return result
+	Bukkit.getPluginManager().registerEvent(T::class.java, listener, priority, listener, this, ignoreCancelled)
+	return listener
 }
 
 fun Cancellable.cancel()
