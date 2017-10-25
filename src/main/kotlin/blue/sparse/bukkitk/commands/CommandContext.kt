@@ -138,9 +138,11 @@ inline fun JavaPlugin.command(
 		override fun execute(sender: CommandSender, label: String, args: Array<out String>): Boolean
 		{
 			val ctx = CommandContext(sender, this, label, argumentMode.converter(args))
-			ctx.failIf(!sender.hasPermission(this.permission), this.permissionMessage)
 
-			try { body(ctx) }
+			try {
+				ctx.failIf(!sender.hasPermission(this.permission), this.permissionMessage)
+				body(ctx)
+			}
 			catch (e: CommandContext.CommandInterrupt) { }
 
 			return true

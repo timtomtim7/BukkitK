@@ -25,6 +25,17 @@ inline fun <reified T : ItemMeta> ItemStack.typedMeta(body: T.() -> Unit)
 	itemMeta = itemMeta.apply { body(this as T) }
 }
 
+fun ItemStack.enchant(enchantment: Enchantment, level: Int = 1) = addEnchantment(enchantment, level)
+var ItemStack.lore: List<String>
+	get() = itemMeta.lore ?: emptyList()
+	set(value) = meta { lore = value }
+var ItemStack.displayName: String?
+	get() = itemMeta.displayName
+	set(value) = meta { displayName = value }
+
+operator fun Material.times(amount: Int) = ItemStack(this, amount)
+operator fun ItemStack.times(amount: Int) = ItemStack(this).apply { this.amount *= amount }
+
 fun ItemStack.enchantedEffect() = meta { enchantedEffect() }
 
 fun ItemMeta.enchantedEffect()
@@ -33,5 +44,3 @@ fun ItemMeta.enchantedEffect()
 	addEnchant(Enchantment.DURABILITY, 0, true)
 	addItemFlags(ItemFlag.HIDE_ENCHANTS)
 }
-
-//inline fun ItemStack.meta(body: ItemMeta.() -> Unit) = meta<ItemMeta>(body)`
