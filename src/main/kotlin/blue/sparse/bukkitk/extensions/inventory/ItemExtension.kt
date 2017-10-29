@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
-val ItemStack?.empty get() = this == null || type == Material.AIR || amount <= 0
+val ItemStack?.empty get() = this == null || (type ?: Material.AIR) == Material.AIR || amount <= 0
 fun ItemStack?.notEmptyOrNull() = if (empty) null else this
 
 inline fun item(material: Material, amount: Int = 1, crossinline body: ItemStack.() -> Unit = {}): ItemStack
