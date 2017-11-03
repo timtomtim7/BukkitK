@@ -5,7 +5,7 @@ import org.bukkit.event.*
 import org.bukkit.plugin.EventExecutor
 import org.bukkit.plugin.java.JavaPlugin
 
-abstract class KListener<T : Event>(val event: Class<T>): Listener, EventExecutor
+abstract class KListener<T : Event>(val eventClass: Class<T>): Listener, EventExecutor
 {
 	private var registered: Boolean = true
 
@@ -23,7 +23,7 @@ abstract class KListener<T : Event>(val event: Class<T>): Listener, EventExecuto
 	@Suppress("UNCHECKED_CAST")
 	override fun execute(listener: Listener, event: Event)
 	{
-		if(listener != this || !event.javaClass.isInstance(event)) return
+		if(listener != this || !eventClass.isInstance(event)) return
 
 		listen(event as T)
 	}
