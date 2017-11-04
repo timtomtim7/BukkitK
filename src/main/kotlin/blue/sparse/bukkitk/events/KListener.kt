@@ -23,19 +23,25 @@ abstract class KListener<T : Event>(val eventClass: Class<T>): Listener, EventEx
 	@Suppress("UNCHECKED_CAST")
 	override fun execute(listener: Listener, event: Event)
 	{
-		if(listener != this || !eventClass.isInstance(event)) return
+		if(listener != this || !eventClass.isInstance(event))
+			return
 
-		listen(event as T)
+		listen(event as? T ?: return)
 	}
 
 	abstract fun listen(event: T)
 }
 
 inline fun <reified T: Event> JavaPlugin.listen(
-		priority: EventPriority = EventPriority.NORMAL, ignoreCancelled: Boolean = true, crossinline body: KListener<T>.(T) -> Unit
+		priority: EventPriority = EventPriority.NORMAL,
+		ignoreCancelled: Boolean = true,
+		crossinline body: KListener<T>.(T) -> Unit
 ): KListener<T>
 {
-	val listener = object: KListener<T>(T::class.java) { override fun listen(event: T) = body(this, event) }
+	val listener = object: KListener<T>(T::class.java)
+	{
+		override fun listen(event: T) = body(this, event)
+	}
 
 	Bukkit.getPluginManager().registerEvent(T::class.java, listener, priority, listener, this, ignoreCancelled)
 	return listener
