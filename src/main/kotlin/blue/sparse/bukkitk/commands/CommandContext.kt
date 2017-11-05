@@ -59,7 +59,7 @@ class CommandContext(val sender: CommandSender, val command: Command, val label:
 		throw SubCommandInterrupt()
 	}
 
-	fun <T> optional(string: String?, parser: Parser<String, T>?): T?
+	fun <T> optional(string: String?, parser: Parser<T>?): T?
 	{
 		return string?.let {
 			try
@@ -69,7 +69,7 @@ class CommandContext(val sender: CommandSender, val command: Command, val label:
 		}
 	}
 
-	fun <T> optional(index: Int, parser: Parser<String, T>?): T?
+	fun <T> optional(index: Int, parser: Parser<T>?): T?
 	{
 		return optional(args.getOrNull(index), parser)
 	}
@@ -79,12 +79,12 @@ class CommandContext(val sender: CommandSender, val command: Command, val label:
 		return optional(index, Parser.get(T::class.java))
 	}
 
-	fun <T> expect(string: String?, parser: Parser<String, T>?): T
+	fun <T> expect(string: String?, parser: Parser<T>?): T
 	{
 		return expect(string, parser) { reply("\u00a7c${command.usage}") }
 	}
 
-	inline fun <T> expect(string: String?, parser: Parser<String, T>?, fallback: () -> Unit): T
+	inline fun <T> expect(string: String?, parser: Parser<T>?, fallback: () -> Unit): T
 	{
 		return optional(string, parser) ?: run {
 			fallback()
@@ -92,12 +92,12 @@ class CommandContext(val sender: CommandSender, val command: Command, val label:
 		}
 	}
 
-	fun <T> expect(index: Int, parser: Parser<String, T>?): T
+	fun <T> expect(index: Int, parser: Parser<T>?): T
 	{
 		return expect(index, parser) { reply("\u00a7c${command.usage}") }
 	}
 
-	inline fun <T> expect(index: Int, parser: Parser<String, T>?, fallback: () -> Unit): T
+	inline fun <T> expect(index: Int, parser: Parser<T>?, fallback: () -> Unit): T
 	{
 		return expect(args.getOrNull(index), parser, fallback)
 	}
